@@ -1,5 +1,7 @@
 # SJTU_CS489_Reinforcement_Learning
 
+[Project Ref: karroyan/CS489-Reinforcement-Learning-Project](https://github.com/karroyan/CS489-Reinforcement-Learning-Project)
+
 ----
 
 ## 1. `Pycharm conda`环境的配置
