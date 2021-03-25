@@ -2,7 +2,7 @@
 
 [Project Ref 1: karroyan/CS489-Reinforcement-Learning-Project](https://github.com/karroyan/CS489-Reinforcement-Learning-Project)
 
-[Project Ref 2: KylinC/SJTU-CS489](https://github.com/KylinC/SJTU-CS489)
+[Project Ref 2: KylinC/SJTU-CS489（有问题，可参考）](https://github.com/KylinC/SJTU-CS489)
 
 ----
 
