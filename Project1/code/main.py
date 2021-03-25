@@ -24,7 +24,6 @@ def value_iteration_policy(env):
     print("------------------------------------")
     print("")
 
-
 def policy_iteration_policy(env):
     policy, V = policy_iteration(env, 0.001, 1.0)
     print("------------------------------------")
@@ -44,3 +43,8 @@ if __name__ == '__main__':
     value_iteration_policy(env_for_value_iter)
     # Policy Iteration
     policy_iteration_policy(env_for_policy_iter)
+
+
+
+
+
