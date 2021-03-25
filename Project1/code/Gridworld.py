@@ -1,6 +1,9 @@
+# Gridworld.py
+
 import numpy as np
 import sys
 from gym.envs.toy_text import discrete
+from io import StringIO
 
 # Action definition
 UP = 0
@@ -8,10 +11,9 @@ RIGHT = 1
 DOWN = 2
 LEFT = 3
 
-# beginGrid
-beginGrid = 1
-# endGrid
-endGrid = 35
+# Terminal State
+terminal_state_1 = 1
+terminal_state_2 = 35
 
 
 # Gridworld class
@@ -30,7 +32,7 @@ class GridworldEnv(discrete.DiscreteEnv):
         MAX_Y = shape[0]
         MAX_X = shape[1]
         # Total number of grids
-        nS = MAX_X + MAX_Y
+        nS = MAX_X * MAX_Y
         # Total number of actions (up, right, down and left)
         nA = 4
 
@@ -50,14 +52,14 @@ class GridworldEnv(discrete.DiscreteEnv):
             # Generate options, the number is nA, which means up/right/down/left, P = {0: {0:[], 1:[], 2:[], 3:[]}, 1: ...}
             P[s] = {a: [] for a in range(nA)}
 
-            # Whether it is beginGrid or endGrid
-            def is_done(pos): return pos == beginGrid or pos == endGrid
+            # Whether it is terminal state
+            def is_done(pos): return pos == terminal_state_1 or pos == terminal_state_2
             # Reward settings
             reward = 0.0 if is_done(s) else -1.0
 
-            # If have reached beginGrid or endGrid
+            # If have reached terminal state
             if is_done(s):
-                # [(prob, next_state, reward, done)], prob means probability, all 1.0, discount rate ()
+                # [(prob, next_state, reward, done)], prob means transfers probability, all 1.0 in MDP
                 P[s][UP] = [(1.0, s, reward, True)]
                 P[s][RIGHT] = [(1.0, s, reward, True)]
                 P[s][DOWN] = [(1.0, s, reward, True)]
@@ -92,4 +94,42 @@ class GridworldEnv(discrete.DiscreteEnv):
         # Close
         if close:
             return
+        # sys.stdout: the input control port of python, print == sys.stdout.write()
+        # StringIO(): read/write str in memory
+        outfile = StringIO() if mode == 'ansi' else sys.stdout
+
+        # Initialize map
+        grid = np.arange(self.nS).reshape(self.shape)
+        # Iterator
+        itr = np.nditer(grid, flags=['multi_index'])
+
+        # Traverse all grids
+        while not itr.finished:
+            s = itr.iterindex
+            y, x = itr.multi_index
+            # terminal state
+            if self.s == s:
+                output = " x "
+            elif s == terminal_state_1 or s == terminal_state_2:
+                output = " T "
+            else:
+                # Normal grid
+                output = " o "
+
+            # If it is a new line
+            if x == 0:
+                # Remove the idle char on the left side of output
+                output = output.lstrip()
+            if x == self.shape[1] - 1:
+                # Remove the idle char on the right side of output
+                output = output.rstrip()
+
+            outfile.write(output)
+
+            if x == self.shape[1] - 1:
+                outfile.write("\n")
+
+            itr.iternext()
+
+
 
