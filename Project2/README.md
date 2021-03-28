@@ -13,7 +13,9 @@
 
 ## 1 Moten-Carlo Learning
 
-<img src="./cut/截屏2021-03-28 下午12.17.35.png" alt="avatar" style="zoom:50%;" />
+- 可以直接从随机 *episodes* 中学习
+- *Model-free*，不需要知道 *MDP* 的传递 / 奖励情况，*MDP* 中选取的 *episode* 必须有终点
+- 基本思想：**某状态的值函数等于平均采样返回值**
 
 <img src="./cut/截屏2021-03-28 下午12.19.25.png" alt="avatar" style="zoom:50%;" />
 
