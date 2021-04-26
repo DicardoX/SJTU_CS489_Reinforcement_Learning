@@ -2,6 +2,11 @@
 
 
 
+- ***On-policy* 和 *Off-policy* 的对比**：
+
+  - *On-policy*：单个策略（非在线的含义）
+  - *Off-policy*：多个策略（非离线含义）
+  
 - *Sarsa* 和 *Q-Learning* 的对比：
 
   - *Sarsa* 算法随机初始化一个 *state*，在当前 *state* 下利用 $\epsilon$ *- greedy* 选择一个当前即将采用的 *action*，然后开始迭代：
