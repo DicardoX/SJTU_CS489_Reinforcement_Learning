@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from RL_brain import DeepQNetwork
 import time
+import os
 
 # Environment
 env = gym.make("MountainCar-v0")
@@ -12,8 +13,8 @@ env = gym.make("MountainCar-v0")
 env = env.unwrapped
 
 # Instantiation of DQN
-model = DeepQNetwork(n_actions=3, n_features=2, neurons_num=10, learning_rate=0.0001, epsilon_greedy=0.9, replace_target_iter=300,
-                     buffer_size=3000, epsilon_greedy_increment=0.0002)
+model = DeepQNetwork(n_actions=3, n_features=2, neurons_num=16, learning_rate=0.0001, epsilon_greedy=0.9, replace_target_iter=300,
+                     buffer_size=5000, epsilon_greedy_increment=0.0005)
 
 
 # Step list
@@ -24,6 +25,11 @@ action_value = []
 episode_cost_list = []
 # Episode time list
 episode_time_list = []
+# Message list
+message_list = []
+
+# Write path
+write_path = "./output/console_log.txt"
 
 
 # Plot
@@ -66,7 +72,8 @@ def plot_info():
 
 if __name__ == '__main__':
     # Total episodes
-    total_episodes = 200
+    total_episodes = 300
+
     # Step counter
     steps_counter = 0
 
@@ -106,11 +113,13 @@ if __name__ == '__main__':
 
             # If done
             if done:
-                message = "| Get" if new_observation[0] >= env.unwrapped.goal_position else "| ----"
-                print("Episode:", i, message, "| Episode reward:", round(episode_reward, 3),
-                      "| Episode steps:", tmp_steps,
-                      "| Episode cost:", round(model.episode_cost, 3),
-                      "| Episode time", round(time.time() - time_mark, 3), "seconds")
+                sub_message = "| Get" if new_observation[0] >= env.unwrapped.goal_position else "| ----"
+                message = "Episode: " + str(i) + " " + sub_message + " | Episode reward: " + str(round(episode_reward, 3)) + \
+                          " | Episode steps: " + str(tmp_steps) + " | Episode cost: " + str(round(model.episode_cost, 3)) + \
+                          " | Episode time: " + str(round(time.time() - time_mark, 3)) + " seconds"
+                print(message)
+                # Update message list
+                message_list.append(message)
                 break
 
             # If not done
@@ -127,6 +136,16 @@ if __name__ == '__main__':
         episode_cost_list.append(model.episode_cost)
         # Update episode time list
         episode_time_list.append(round(time.time() - time_mark))
+
+    # Write message list
+    # File operation
+    if os.path.exists(write_path):
+        os.remove(write_path)
+    f = open(write_path, "w")
+    for i in range(len(message_list)):
+        f.writelines(message_list[i])
+        f.write("\n")
+    f.close()
 
     # Plot
     plot_info()
