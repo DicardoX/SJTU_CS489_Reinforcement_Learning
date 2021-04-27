@@ -3,41 +3,45 @@
 # Implementation of DeepQNetwork Class
 
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 from matplotlib import pyplot as plt
 
 
 # Deep Q Network Off-policy
 class DeepQNetwork:
-    def __init__(self,
-                 n_actions,
-                 n_features,
-                 learning_rate=0.01,
-                 reward_decay=0.9,
-                 epsilon_greedy=0.9,
-                 replace_target_iter=300,
-                 buffer_size=500,
-                 batch_size=32,
-                 epsilon_greedy_increment=None,
-                 output_graph=False
-                 ):
+    def __init__(
+            self,
+            n_actions,
+            n_features,
+            neurons_num=10,
+            learning_rate=0.01,
+            reward_decay=0.9,
+            epsilon_greedy=0.9,
+            replace_target_iter=300,
+            buffer_size=500,
+            batch_size=32,
+            epsilon_greedy_increment=None,
+            output_graph=False,
+    ):
         self.n_actions = n_actions
         # Each state can be described as n_features features list
         self.n_features = n_features
+        self.neurons_num = neurons_num
         self.lr = learning_rate
         self._gamma = reward_decay
-        self._epsilon_max = epsilon_greedy
+        self.epsilon_max = epsilon_greedy
         # Update Q target each self.replace_target_iter rounds
         self.replace_target_iter = replace_target_iter
         self.buffer_size = buffer_size
         self.batch_size = batch_size
-        self._epsilon_increment = epsilon_greedy_increment
-        self._epsilon = 0 if epsilon_greedy_increment is not None else self._epsilon_max
+        self.epsilon_increment = epsilon_greedy_increment
+        self.epsilon = 0 if epsilon_greedy_increment is not None else self.epsilon_max
         # Total learn step
         self.learn_step_counter = 0
         # Initialize memory buffer
         self.buffer = np.zeros((self.buffer_size, n_features * 2 + 2))
+        # Cost in an episode
+        self.episode_cost = 0
 
         # Consist of [Target_net, Evaluate_net]
         self._build_net()
@@ -65,7 +69,7 @@ class DeepQNetwork:
             # Collections to store variables, used later when assign to target net
             collections_names = ["eval_net_params", tf.GraphKeys.GLOBAL_VARIABLES]
             # Number of neurons in a layer
-            neurons_num = 10
+            neurons_num = self.neurons_num
             # Weight initializer
             weight_initializer = tf.random_normal_initializer(0.0, 0.3)
             # Bias initializer
@@ -137,8 +141,8 @@ class DeepQNetwork:
         # Observation, only have batch dimension when feed into tf.placeholder
         observation = observation[np.newaxis, :]
 
-        # _epsilon greedy
-        if np.random.uniform() < self._epsilon:
+        # epsilon greedy
+        if np.random.uniform() < self.epsilon:
             # Forward feed the observation into evaluate_net and get Q value for every actions
             actions_value = self.session.run(self.q_eval, feed_dict={self.eval_input: observation})
             # Choose an action based on greedy
@@ -154,7 +158,7 @@ class DeepQNetwork:
         # Update Q target each self.replace_target_iter rounds
         if self.learn_step_counter % self.replace_target_iter == 0:
             self.session.run(self.replace_target_op)
-            print("\nQ target net has been updated...\n")
+            # print("Q target net has been updated...")
 
         # Sample batch from memory buffer, the sample_idx is a 1-D list with length of self.batch_size
         if self.buffer_counter > self.buffer_size:
@@ -172,8 +176,10 @@ class DeepQNetwork:
         q_next, q_eval = self.session.run(
             [self.q_next, self.q_eval],
             feed_dict={
-                self.target_input: batch_buffer[:, -self.n_features:],    # Next state's features,  last self.n_features cols(!) of samples in batch_buffer
-                self.eval_input: batch_buffer[:, :self.n_features],         # Current state's features,  first self.n_features cols(!) of samples in batch_buffer
+                # Next state's features,  last self.n_features cols(!) of samples in batch_buffer
+                self.target_input: batch_buffer[:, -self.n_features:],
+                # Current state's features,  first self.n_features cols(!) of samples in batch_buffer
+                self.eval_input: batch_buffer[:, :self.n_features],
             }
         )
 
@@ -200,9 +206,11 @@ class DeepQNetwork:
                                                    }
                                         )
         self.cost_history.append(self.cost)
+        # Update self.episode_cost
+        self.episode_cost += self.cost
 
         # Increasing epsilon
-        self._epsilon = self._epsilon + self._epsilon_increment if self._epsilon < self._epsilon_max else self._epsilon_max
+        self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
 
         self.learn_step_counter += 1
 
@@ -211,7 +219,5 @@ class DeepQNetwork:
         plt.plot(np.arange(len(self.cost_history)), self.cost_history)
         plt.ylabel("Cost")
         plt.xlabel("Training steps")
+        plt.savefig("./output/steps_cost")
         plt.show()
-
-
-
