@@ -219,7 +219,7 @@ class DeepQNetwork:
         plt.plot(np.arange(len(self.cost_history)), self.cost_history)
         plt.ylabel("Cost")
         plt.xlabel("Training steps")
-        plt.savefig("./output/steps_cost")
+        plt.savefig("./output/DQN_steps_cost")
         plt.show()
 
 
@@ -466,5 +466,5 @@ class Double_DeepQNetwork:
         plt.plot(np.arange(len(self.cost_history)), self.cost_history)
         plt.ylabel("Cost")
         plt.xlabel("Training steps")
-        plt.savefig("./output2/steps_cost")
+        plt.savefig("./output/DDQN_steps_cost")
         plt.show()

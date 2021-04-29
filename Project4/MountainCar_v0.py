@@ -15,77 +15,73 @@ env = env.unwrapped
 # Instantiation of DQN
 DQN_model = DeepQNetwork(n_actions=3, n_features=2, neurons_num=16, learning_rate=0.0001, epsilon_greedy=0.9,
                          replace_target_iter=300,
-                         buffer_size=5000, epsilon_greedy_increment=0.0005)
+                         buffer_size=4096, batch_size=64, epsilon_greedy_increment=0.0001)
 # Instantiation of Double_DQN
 Double_DQN_model = Double_DeepQNetwork(n_actions=3, n_features=2, neurons_num=16, learning_rate=0.0001,
                                        epsilon_greedy=0.9,
                                        replace_target_iter=300,
-                                       buffer_size=5000, epsilon_greedy_increment=0.0005)
+                                       buffer_size=4096, batch_size=64, epsilon_greedy_increment=0.0001)
 
-# Choose use DQN or DDQN: 0 for DQN, 1 for DDQN
-choice_index = 1
 
 # Step list
-step_list = []
-# Average action value
-action_value = []
+my_step_list = []
 # Episode cost list
-episode_cost_list = []
+my_episode_cost_list = []
 # Episode time list
-episode_time_list = []
+my_episode_time_list = []
 # Message list
 message_list = []
-
-# Write path
-write_path = "./output/console_log.txt" if choice_index == 0 else "./output2/console_log_for_DDQN.txt"
 
 
 # Plot
 def plot_info():
-    output_path = "./output/" if choice_index == 0 else "./output2/"
+    output_path = "./output/"
 
     # Plot step list
-    step_list_x = np.arange(len(step_list))
-    plt.plot(step_list_x, step_list)
+    step_list_x = np.arange(len(my_step_list[0]))
+    plt.plot(step_list_x, my_step_list[0], color="tab:blue")
+    plt.plot(step_list_x, my_step_list[1], color="tab:orange")
     plt.xlabel("Epochs")
     plt.ylabel("Step of episode")
+    plt.legend(["DQN", "Double DQN"])
     plt.savefig(output_path + "step_list")
     plt.show()
 
-    # Plot average action value
-    action_value_x = np.arange(len(action_value))
-    plt.plot(action_value_x, action_value)
-    plt.xlabel("Epochs")
-    plt.ylabel("Average action value")
-    plt.savefig(output_path + "action_value")
-    plt.show()
-
     # Plot episode cost list
-    episode_cost_list_x = np.arange(len(episode_cost_list))
-    plt.plot(episode_cost_list_x, episode_cost_list)
+    episode_cost_list_x = np.arange(len(my_episode_cost_list[0]))
+    plt.plot(episode_cost_list_x, my_episode_cost_list[0], color="tab:blue")
+    plt.plot(episode_cost_list_x, my_episode_cost_list[1], color="tab:orange")
     plt.xlabel("Epochs")
     plt.ylabel("Episode cost")
+    plt.legend(["DQN", "Double DQN"])
     plt.savefig(output_path + "episode_cost_list")
     plt.show()
 
     # Plot episode time list
-    episode_time_list_x = np.arange(len(episode_time_list))
-    plt.plot(episode_time_list_x, episode_time_list)
+    episode_time_list_x = np.arange(len(my_episode_time_list[0]))
+    plt.plot(episode_time_list_x, my_episode_time_list[0], color="tab:blue")
+    plt.plot(episode_time_list_x, my_episode_time_list[1], color="tab:orange")
     plt.xlabel("Epochs")
     plt.ylabel("Episode time")
+    plt.legend(["DQN", "Double DQN"])
     plt.savefig(output_path + "episode_time_list")
     plt.show()
 
     # Plot step cost
-    if choice_index == 0:
-        DQN_model.plot_cost_curve()
-    else:
-        Double_DQN_model.plot_cost_curve()
+    DQN_model.plot_cost_curve()
+    Double_DQN_model.plot_cost_curve()
 
 
-if __name__ == '__main__':
-    # Total episodes
-    total_episodes = 300
+def main(choice_index):
+    # Step list
+    step_list = []
+    # Episode cost list
+    episode_cost_list = []
+    # Episode time list
+    episode_time_list = []
+
+    # Write path
+    write_path = "./output/console_log.txt" if choice_index == 0 else "./output/console_log_for_DDQN.txt"
 
     # Step counter
     steps_counter = 0
@@ -158,8 +154,6 @@ if __name__ == '__main__':
             steps_counter += 1
             tmp_steps += 1
 
-        # Update average action value
-        action_value.append(float(episode_reward / tmp_steps))
         # Update steps list
         step_list.append(tmp_steps)
         # Update episode cost list
@@ -176,6 +170,24 @@ if __name__ == '__main__':
         f.writelines(message_list[i])
         f.write("\n")
     f.close()
+
+    my_step_list.append(step_list)
+    my_episode_cost_list.append(episode_cost_list)
+    my_episode_time_list.append(episode_time_list)
+
+
+if __name__ == '__main__':
+    # Total episodes
+    total_episodes = 300
+
+    # DQN
+    # Choose use DQN or DDQN: 0 for DQN, 1 for DDQN
+    choice_index = 0
+    main(choice_index)
+
+    # Double DQN
+    choice_index = 1
+    main(choice_index)
 
     # Plot
     plot_info()
